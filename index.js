@@ -11,66 +11,62 @@ app.use(cors());
 app.use(express.json());
 ///-----Stk push -----///
 app.get("/stk", access, (req, res) => {
-    
-  
-    let endpoint = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-     auth = "Bearer "+ req.access_token
-     let _shortCode = '174379'
-     let _passKey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-    
-    let amount = req.amount
-    const _phone = req.PhoneNumber
+    let endpoint =
+        "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+        auth = "Bearer " + req.access_token;
+    let _shortCode = "174379";
+    let _passKey =
+        "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
 
-     const timeStamp = (new Date()).toISOString().replace(/[^0-9]/g, '').slice(0, -3);
-     const password = Buffer.from(`${_shortCode}${_passKey}${timeStamp}`).toString('base64');
+    let amount = req.amount;
+    const _phone = req.PhoneNumber;
 
-    request(
-        {
-            url:endpoint,
-            method:"POST",
-            headers:{
+    const timeStamp = new Date()
+        .toISOString()
+        .replace(/[^0-9]/g, "")
+        .slice(0, -3);
+    const password = Buffer.from(`${_shortCode}${_passKey}${timeStamp}`).toString(
+        "base64"
+    );
 
-                "Authorization": auth
-                
+    request({
+            url: endpoint,
+            method: "POST",
+            headers: {
+                Authorization: auth,
             },
-    
-        json:{
-    
-                    "BusinessShortCode": "174379",
-                    "Password":password,
-                    "Timestamp":timeStamp, 
-                    "TransactionType": "CustomerPayBillOnline",
-                    "Amount": "1",
-                    "PartyA": "254746291229",
-                    "PartyB": "174379",
-                    "PhoneNumber":  "254746291229",
-                    "CallBackURL": "http://d57a58bd3e72.ngrok.io/Callbacks",
-                    "AccountReference": " Elmasha TEST",
-                    "TransactionDesc": "Lipa na Mpesa"
 
-            }
-
+            json: {
+                BusinessShortCode: "174379",
+                Password: password,
+                Timestamp: timeStamp,
+                TransactionType: "CustomerPayBillOnline",
+                Amount: "1",
+                PartyA: "254746291229",
+                PartyB: "174379",
+                PhoneNumber: "254746291229",
+                CallBackURL: "https://mkobampesa.herokuapp.com/Callbacks",
+                AccountReference: " Elmasha TEST",
+                TransactionDesc: "Lipa na Mpesa",
+            },
         },
-       function(error,response,body){
-
-            if(error){
-
+        function(error, response, body) {
+            if (error) {
                 console.log(error);
-
-            }else if(response == 404){
-
-                console.log("Error Something went wrong..")
-
-
+            } else if (response == 404) {
+                console.log("Error Something went wrong..");
             }
-                res.status(200).json(body)
-                console.log(body,amount)
-    
-        })
+            res.status(200).json(body);
+            console.log(body, amount);
+        }
+    );
+});
 
-})
-
-
+app.post("/Callbacks", _urlencoded, (req, res) => {
+    console.log("======Stk Callback======");
+    res.json(req.body.Body.stkCallback.CallbackMetadata);
+    console.log(req.body.Body.stkCallback.CallbackMetadata);
+});
 
 ///-----B2c -----///
 app.get("/b2c", access, (req, res) => {
