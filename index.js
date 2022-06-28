@@ -9,6 +9,22 @@ const port = app.listen(process.env.PORT || 4001);
 const _urlencoded = express.urlencoded({ extended: false });
 app.use(cors());
 app.use(express.json());
+
+//----AllOW ACCESS -----//
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+
+    if (req.method === "OPTIONS") {
+        res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+        return res.status(200).json({});
+    }
+    next();
+});
+
 ///-----Stk push -----///
 app.get("/stk", access, (req, res) => {
     let endpoint =
