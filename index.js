@@ -12,7 +12,7 @@ app.use(express.json());
 
 //----AllOW ACCESS -----//
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "");
+    res.header("Access-Control-Allow-Origin", "https://mkobampesa.herokuapp.com");
     res.header(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept, Authorization"
@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 });
 
 ///-----Stk push -----///
-app.get("/stk", access, (req, res) => {
+app.post("/stk", access, (req, res) => {
     let endpoint =
         "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
         auth = "Bearer " + req.access_token;
@@ -34,8 +34,10 @@ app.get("/stk", access, (req, res) => {
     let _passKey =
         "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
 
-    let amount = req.amount;
-    const _phone = req.PhoneNumber;
+    let amount = req.body.amount;
+    let _phone = req.body.PhoneNumber;
+    let _uid = req.body.User_id;
+    let _userName = req.body.User_name;
 
     const timeStamp = new Date()
         .toISOString()
@@ -57,10 +59,10 @@ app.get("/stk", access, (req, res) => {
                 Password: password,
                 Timestamp: timeStamp,
                 TransactionType: "CustomerPayBillOnline",
-                Amount: "1",
+                Amount: amount,
                 PartyA: "254746291229",
                 PartyB: "174379",
-                PhoneNumber: "254746291229",
+                PhoneNumber: _phone,
                 CallBackURL: "https://mkobampesa.herokuapp.com/Callbacks",
                 AccountReference: " Elmasha TEST",
                 TransactionDesc: "Lipa na Mpesa",
@@ -78,6 +80,7 @@ app.get("/stk", access, (req, res) => {
     );
 });
 
+//-----Stk callBacks----/////
 app.post("/Callbacks", _urlencoded, (req, res) => {
     console.log("======Stk Callback======");
     res.json(req.body.Body.stkCallback.CallbackMetadata);
